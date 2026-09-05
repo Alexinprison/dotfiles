@@ -1,0 +1,57 @@
+# ============================================================
+# 敏感信息防护：凭证 / 密钥 / 令牌（严禁提交）
+# ============================================================
+
+# Git 凭证（明文令牌，最高优先级忽略）
+.git-credentials
+.netrc
+.netrc.gpg
+
+# 环境变量文件（常含 API 密钥，允许 .env.example 模板）
+.env
+.env.*
+!.env.example
+
+# npm 配置（可能含 _authToken，确需跟踪请用 git add -f）
+.npmrc
+
+# SSH 密钥（仅放行无敏感信息的 config）
+.ssh/*
+!.ssh/config
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+id_ecdsa
+id_ecdsa.*
+*.pem
+*.key
+*.pfx
+*.p12
+
+# 云平台凭证
+.aws/
+.config/gcloud/
+.azure/
+.config/gh/hosts.yml
+
+# GPG 私钥
+.gnupg/
+
+# ============================================================
+# 机器生成 / 易变文件（不宜纳入版本控制）
+# ============================================================
+
+# Wget HSTS 缓存
+.wget-hsts
+
+# Shell 历史记录
+.bash_history
+.zsh_history
+.node_repl_history
+.python_history
+
+# 其他缓存 / 临时文件
+.lesshst
+.viminfo
+.DS_Store
