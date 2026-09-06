@@ -123,6 +123,7 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 export ANTHROPIC_BASE_URL=https://api.deepseek.com/anthropic
+export ANTHROPIC_AUTH_TOKEN=sk-347b9e092b7a4f7a9ab31e5721b0319d
 export ANTHROPIC_MODEL=deepseek-v4-pro[1m]
 export ANTHROPIC_DEFAULT_OPUS_MODEL=deepseek-v4-pro[1m]
 export ANTHROPIC_DEFAULT_SONNET_MODEL=deepseek-v4-pro[1m]
@@ -130,10 +131,23 @@ export ANTHROPIC_DEFAULT_HAIKU_MODEL=deepseek-v4-flash
 export CLAUDE_CODE_SUBAGENT_MODEL=deepseek-v4-flash
 export CLAUDE_CODE_EFFORT_LEVEL=max
 export CLAUDE_CODE_AUTO_COMPACT_WINDOW=786432
-if [ -f "$HOME/.env.secrets" ]; then
-    source "$HOME/.env.secrets"
-fi
 
-export WINDOWS=/mnt/c/Users/35986
+export WINDOWS=/mnt/c/Users/Alex
 
-alias open='explorer.exe >/dev/null 2>&1'
+shopt -s globstar
+
+gpa() {
+    if [ -z "$1" ]; then
+        echo "Usage: gpa <.csv file>"
+        return 1
+    fi
+    awk -F',' '$1>0 { 
+        gpa = 4 - 3 * ($2 - 100)^2 / 1600; 
+        floor_gpa = int(gpa * 100) / 100; 
+        total_gpa += $1 * floor_gpa; 
+        total_credit += $1 
+    } END { 
+        if (total_credit > 0) print total_gpa / total_credit;
+        else print "Effective data not found" 
+    }' "$1"
+}
