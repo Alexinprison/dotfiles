@@ -1,0 +1,8 @@
+# 开启 Tab 补全忽略大小写
+set completion-ignore-case on
+
+# （可选）按一次 Tab 即可显示所有模糊匹配列表，无需连续按两次 Tab
+set show-all-if-ambiguous on
+
+# （可选）忽略文件名中的连字符(-)和下划线(_)差异
+set completion-map-case on
