@@ -132,7 +132,8 @@ export CLAUDE_CODE_SUBAGENT_MODEL=deepseek-flash
 export CLAUDE_CODE_EFFORT_LEVEL=max
 export CLAUDE_CODE_AUTO_COMPACT_WINDOW=786432
 
-export WINDOWS=/mnt/c/Users
+export desktop=/mnt/c/Users/35986/Downloads
+export laptop=/mnt/c/Users/Alex/Downloads
 
 shopt -s globstar
 
