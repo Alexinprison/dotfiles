@@ -152,3 +152,5 @@ gpa() {
         else print "Effective data not found" 
     }' "$1"
 }
+
+alias submit="git add . && git commit -m \"$(date)\" && git push"
