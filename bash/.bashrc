@@ -153,4 +153,6 @@ gpa() {
     }' "$1"
 }
 
-alias submit="git add . && git commit -m \"$(date)\" && git push"
+submit() {
+    git add . && git commit -m "Auto commit: $(date '+%Y-%m-%d %H:%M:%S')" && git push
+}
