@@ -156,3 +156,5 @@ gpa() {
 submit() {
     git add . && git commit -m "Auto commit: $(date '+%Y-%m-%d %H:%M:%S')" && git push
 }
+
+alias st='git status'
