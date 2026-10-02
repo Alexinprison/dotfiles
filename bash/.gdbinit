@@ -1,3 +1,3 @@
 set confirm off
 set debuginfod enabled off
-set print pretty on
+source ~/dotfiles/bash/matrix_printer.py
