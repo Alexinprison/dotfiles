@@ -122,15 +122,11 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-export ANTHROPIC_BASE_URL=https://api.deepseek.com/anthropic
-export ANTHROPIC_AUTH_TOKEN=sk-347b9e092b7a4f7a9ab31e5721b0319d
-export ANTHROPIC_MODEL=deepseek-flash[1m]
-export ANTHROPIC_DEFAULT_OPUS_MODEL=deepseek-flash[1m]
-export ANTHROPIC_DEFAULT_SONNET_MODEL=deepseek-flash[1m]
-export ANTHROPIC_DEFAULT_HAIKU_MODEL=deepseek-flash
-export CLAUDE_CODE_SUBAGENT_MODEL=deepseek-flash
-export CLAUDE_CODE_EFFORT_LEVEL=max
-export CLAUDE_CODE_AUTO_COMPACT_WINDOW=786432
+
+export ANTHROPIC_MODEL=claude-opus-5-5
+if [ -f "$HOME/.claude-env" ]; then
+    source "$HOME/.claude-env"
+fi
 
 export desktop=/mnt/c/Users/35986/Downloads
 export laptop=/mnt/c/Users/Alex/Downloads
