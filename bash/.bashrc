@@ -116,23 +116,24 @@ if ! shopt -oq posix; then
   fi
 fi
 
-PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "
-
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
+# Prompt 美化
+PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "
 
+# Claude 设置
 export ANTHROPIC_MODEL=claude-opus-5-5
 if [ -f "$HOME/.claude-env" ]; then
     source "$HOME/.claude-env"
 fi
 
+# Windows 快捷路径
 export desktop=/mnt/c/Users/35986/Downloads
 export laptop=/mnt/c/Users/Alex/Downloads
 
-shopt -s globstar
-
+# 绩点快速计算
 gpa() {
     if [ -z "$1" ]; then
         echo "Usage: gpa <.csv file>"
@@ -149,8 +150,26 @@ gpa() {
     }' "$1"
 }
 
+# 快速 git push
 submit() {
     git add . && git commit -m "Auto commit: $(date '+%Y-%m-%d %H:%M:%S')" && git push
 }
 
+# 快速 git status
 alias st='git status'
+
+# 用 Windows 资源管理器打开文件
+open() {
+    local target="${1:-.}"
+
+    if [ ! -e "$target" ]; then
+        printf 'open: %s: 没有那个文件或目录\n' "$target" >&2
+        return 1
+    fi
+
+    local winpath
+    winpath="$(wslpath -w "$(realpath -- "$target")")" || return 1
+
+    explorer.exe "$winpath" 2>/dev/null
+    return 0
+}
