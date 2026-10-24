@@ -173,3 +173,8 @@ open() {
     explorer.exe "$winpath" 2>/dev/null
     return 0
 }
+
+. "$HOME/.local/bin/env"
+
+# zoxide 设置
+eval "$(zoxide init bash)"
