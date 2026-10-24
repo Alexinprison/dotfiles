@@ -178,3 +178,6 @@ open() {
 
 # zoxide 设置
 eval "$(zoxide init bash)"
+
+# batcat
+alias bat=batcat
