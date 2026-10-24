@@ -181,3 +181,10 @@ eval "$(zoxide init bash)"
 
 # batcat
 alias bat=batcat
+
+# eza
+alias ls='eza --icons --git --group-directories-first'
+alias ll='eza -lh --icons --git --group-directories-first'
+alias la='eza -lah --icons --git --group-directories-first'
+alias lt='eza --tree --level=2 --icons'
+alias lm='eza -lht --icons --git --group-directories-first'
