@@ -124,7 +124,7 @@ export NVM_DIR="$HOME/.nvm"
 PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "
 
 # Claude 设置
-export ANTHROPIC_MODEL=claude-opus-5-5
+export ANTHROPIC_MODEL=gpt-6-astra
 if [ -f "$HOME/.claude-env" ]; then
     source "$HOME/.claude-env"
 fi
