@@ -57,20 +57,13 @@ if [ -n "$force_color_prompt" ]; then
 fi
 
 if [ "$color_prompt" = yes ]; then
-    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 else
-    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+    PS1='${debian_chroot:+($debian_chroot)}\u:\w\$ '
 fi
 unset color_prompt force_color_prompt
 
-# If this is an xterm set the title to user@host:dir
-case "$TERM" in
-xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-    ;;
-*)
-    ;;
-esac
+# Keep the terminal title unchanged.
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
@@ -116,75 +109,107 @@ if ! shopt -oq posix; then
   fi
 fi
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# Include user binaries in non-login shells without duplicating PATH entries.
+for _dotfiles_bin in "$HOME/bin" "$HOME/.local/bin"; do
+    if [ -d "$_dotfiles_bin" ]; then
+        case ":$PATH:" in
+            *:"$_dotfiles_bin":*) ;;
+            *) export PATH="$_dotfiles_bin:$PATH" ;;
+        esac
+    fi
+done
+unset _dotfiles_bin
 
-# Prompt 美化
-PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "
-
-# Claude 设置
-export ANTHROPIC_MODEL=gpt-6-astra
-if [ -f "$HOME/.claude-env" ]; then
-    source "$HOME/.claude-env"
+# Load nvm and its completions when installed.
+export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+if [ -s "$NVM_DIR/nvm.sh" ]; then
+    . "$NVM_DIR/nvm.sh"
+fi
+if [ -s "$NVM_DIR/bash_completion" ]; then
+    . "$NVM_DIR/bash_completion"
 fi
 
-# Windows 快捷路径
-export desktop=/mnt/c/Users/35986/Downloads
-export laptop=/mnt/c/Users/Alex/Downloads
+# Preserve the existing Windows Downloads shortcuts; allow local overrides.
+export desktop="${desktop:-/mnt/c/Users/35986/Downloads}"
+export laptop="${laptop:-/mnt/c/Users/Alex/Downloads}"
 
-# 绩点快速计算
+# Calculate the credit-weighted GPA from a CSV containing credits and scores.
 gpa() {
-    if [ -z "$1" ]; then
-        echo "Usage: gpa <.csv file>"
+    if [ "$#" -ne 1 ]; then
+        printf 'Usage: gpa <csv-file>\n' >&2
         return 1
     fi
-    awk -F',' '$1>0 { 
-        gpa = 4 - 3 * ($2 - 100)^2 / 1600; 
-        floor_gpa = int(gpa * 100) / 100; 
-        total_gpa += $1 * floor_gpa; 
-        total_credit += $1 
-    } END { 
+    if [ ! -f "$1" ] || [ ! -r "$1" ]; then
+        printf 'gpa: cannot read file: %s\n' "$1" >&2
+        return 1
+    fi
+    awk -F',' '$1>0 {
+        gpa = 4 - 3 * ($2 - 100)^2 / 1600;
+        floor_gpa = int(gpa * 100) / 100;
+        total_gpa += $1 * floor_gpa;
+        total_credit += $1
+    } END {
         if (total_credit > 0) print total_gpa / total_credit;
-        else print "Effective data not found" 
+        else print "Effective data not found"
     }' "$1"
 }
 
-# 快速 git push
-submit() {
-    git add . && git commit -m "Auto commit: $(date '+%Y-%m-%d %H:%M:%S')" && git push
-}
+# Aliases for git command
+alias gs="git status"
+alias ga="git add"
+alias gc="git commit"
 
-# 快速 git status
-alias st='git status'
-
-# 用 Windows 资源管理器打开文件
+# Open a file or directory in Windows Explorer from WSL.
 open() {
+    if [ "$#" -gt 1 ]; then
+        printf 'Usage: open [path]\n' >&2
+        return 1
+    fi
     local target="${1:-.}"
 
     if [ ! -e "$target" ]; then
-        printf 'open: %s: 没有那个文件或目录\n' "$target" >&2
+        printf 'open: no such file or directory: %s\n' "$target" >&2
         return 1
     fi
+    if ! command -v wslpath >/dev/null 2>&1 || ! command -v explorer.exe >/dev/null 2>&1; then
+        printf 'open: WSL Windows interoperability is unavailable\n' >&2
+        return 127
+    fi
 
-    local winpath
-    winpath="$(wslpath -w "$(realpath -- "$target")")" || return 1
+    local absolute_path winpath status
+    absolute_path="$(realpath -- "$target")" || return 1
+    winpath="$(wslpath -w "$absolute_path")" || return 1
 
-    explorer.exe "$winpath" 2>/dev/null
-    return 0
+    if explorer.exe "$winpath" 2>/dev/null; then
+        return 0
+    else
+        status=$?
+        # Explorer may report status 1 after successfully opening a window.
+        [ "$status" -eq 1 ] && return 0
+        return "$status"
+    fi
 }
 
-. "$HOME/.local/bin/env"
+# Enable zoxide navigation when installed.
+if command -v zoxide >/dev/null 2>&1; then
+    eval "$(zoxide init bash)"
+fi
 
-# zoxide 设置
-eval "$(zoxide init bash)"
+# Use Ubuntu's batcat executable when available.
+if command -v batcat >/dev/null 2>&1; then
+    alias bat='batcat'
+fi
 
-# batcat
-alias bat=batcat
+# Use eza for directory listings, retaining Ubuntu's aliases if it is absent.
+if command -v eza >/dev/null 2>&1; then
+    alias ls='eza --icons --git --group-directories-first'
+    alias ll='eza -lh --icons --git --group-directories-first'
+    alias la='eza -lah --icons --git --group-directories-first'
+    alias lt='eza --tree --level=2 --icons'
+    alias lm='eza -lht --icons --git --group-directories-first'
+fi
 
-# eza
-alias ls='eza --icons --git --group-directories-first'
-alias ll='eza -lh --icons --git --group-directories-first'
-alias la='eza -lah --icons --git --group-directories-first'
-alias lt='eza --tree --level=2 --icons'
-alias lm='eza -lht --icons --git --group-directories-first'
+# Apply machine-specific settings last without adding them to this repository.
+if [ -r "$HOME/.bashrc.local" ]; then
+    . "$HOME/.bashrc.local"
+fi

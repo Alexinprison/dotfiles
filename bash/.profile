@@ -16,14 +16,14 @@ if [ -n "$BASH_VERSION" ]; then
     fi
 fi
 
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/bin" ] ; then
-    PATH="$HOME/bin:$PATH"
-fi
-
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/.local/bin" ] ; then
-    PATH="$HOME/.local/bin:$PATH"
-fi
-
-. "$HOME/.local/bin/env"
+# Include user binaries without duplicating entries when this file is reloaded.
+for _dotfiles_bin in "$HOME/bin" "$HOME/.local/bin"; do
+    if [ -d "$_dotfiles_bin" ]; then
+        case ":$PATH:" in
+            *:"$_dotfiles_bin":*) ;;
+            *) PATH="$_dotfiles_bin:$PATH" ;;
+        esac
+    fi
+done
+unset _dotfiles_bin
+export PATH

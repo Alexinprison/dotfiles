@@ -7,7 +7,7 @@ class MatrixPrinter:
         self.val = val
 
     def _get_rows(self):
-        """返回所有行，每一行都是 Python list[gdb.Value]"""
+        """Return all rows as Python lists of gdb.Value objects."""
         impl = self.val['_M_impl']
 
         outer_start = impl['_M_start']
@@ -42,13 +42,13 @@ class MatrixPrinter:
             if row_count == 0:
                 return "Matrix(0x0)"
 
-            # 计算最大列数
+            # Find the maximum number of columns.
             col_count = max(len(row) for row in rows)
 
             if col_count == 0:
                 return f"Matrix({row_count}x0)"
 
-            # 转成字符串，方便计算每列宽度
+            # Convert values to strings before calculating column widths.
             data = []
 
             for row in rows:
@@ -57,7 +57,7 @@ class MatrixPrinter:
                     for cell in row
                 ])
 
-            # 每一列的最大宽度
+            # Find the maximum width of each column.
             col_widths = []
 
             for j in range(col_count):
@@ -66,10 +66,10 @@ class MatrixPrinter:
                     for row in data
                 )
 
-                # 至少留一点空间
+                # Reserve at least one character per column.
                 col_widths.append(max(width, 1))
 
-            # 行号宽度
+            # Determine the width of the row labels.
             row_label_width = max(
                 len(str(i))
                 for i in range(row_count)
@@ -77,10 +77,10 @@ class MatrixPrinter:
 
             lines = []
 
-            # 第一行：Matrix 尺寸
+            # Display the matrix dimensions on the first line.
             lines.append(f"Matrix({row_count}x{col_count})")
 
-            # 列编号
+            # Display column indexes.
             header = " " * (row_label_width + 2)
 
             for j in range(col_count):
@@ -90,7 +90,7 @@ class MatrixPrinter:
 
             lines.append(header.rstrip())
 
-            # 每一行
+            # Render each row.
             for i, row in enumerate(data):
                 line = str(i).rjust(row_label_width) + "  "
 
@@ -112,10 +112,7 @@ class MatrixPrinter:
         except Exception as e:
             return f"Matrix(<python error: {e}>)"
 
-    # 不再提供 children()
-    #
-    # 这样 GDB 不会继续把 vector 当成 std::vector 展开，
-    # 而是直接使用上面的二维表格字符串。
+    # Omit children() so GDB uses the table instead of expanding the vector.
     def display_hint(self):
         return None
 
@@ -151,17 +148,17 @@ def register_for_objfile(objfile):
         )
 
 
-# 注册当前已经存在的 objfile
+# Register the printer for object files that are already loaded.
 for objfile in gdb.objfiles():
     register_for_objfile(objfile)
 
 
-# 以后新加载的 objfile 也自动注册
+# Register the printer automatically for newly loaded object files.
 def on_new_objfile(event):
     register_for_objfile(event.new_objfile)
 
 
-# 防止 source 多次导致重复注册事件
+# Avoid duplicate event handlers when this file is sourced repeatedly.
 old_handler = getattr(
     gdb,
     "_matrix_printer_handler",

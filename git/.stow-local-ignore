@@ -1,0 +1,5 @@
+# Credentials and local identity overrides are not part of the public package.
+\.git-credentials
+\.gitconfig\.local
+.*~
+.*\.sw[op]

@@ -1,3 +1,11 @@
+# Keep the existing confirmation and debug-info download preferences.
 set confirm off
 set debuginfod enabled off
-source ~/dotfiles/bash/matrix_printer.py
+
+# Locate the printer beside this file after resolving its Stow symlink.
+python
+from pathlib import Path
+import runpy
+_matrix_printer_path = Path("~/.gdbinit").expanduser().resolve().with_name("matrix_printer.py")
+runpy.run_path(str(_matrix_printer_path))
+end

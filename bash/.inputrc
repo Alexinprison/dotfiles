@@ -1,8 +1,11 @@
-# 开启 Tab 补全忽略大小写
+# Keep the system's Readline defaults, including Home/End and Ctrl-arrow keys.
+$include /etc/inputrc
+
+# Complete names without matching their letter case.
 set completion-ignore-case on
 
-# （可选）按一次 Tab 即可显示所有模糊匹配列表，无需连续按两次 Tab
+# Show ambiguous completion candidates after a single Tab.
 set show-all-if-ambiguous on
 
-# （可选）忽略文件名中的连字符(-)和下划线(_)差异
+# Treat hyphens and underscores as equivalent during completion.
 set completion-map-case on

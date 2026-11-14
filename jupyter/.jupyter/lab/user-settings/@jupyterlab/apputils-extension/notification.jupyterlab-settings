@@ -1,0 +1,4 @@
+{
+    // Disable requests for the official Jupyter news feed.
+    "fetchNews": "false"
+}

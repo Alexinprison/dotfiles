@@ -1,0 +1,2 @@
+# Keep machine-specific Claude Code permissions out of every repository.
+**/.claude/settings.local.json

@@ -1,5 +1,7 @@
 [user]
-	name = Alex-ip1077
+	name = Alexinprison
 	email = 3598696402@qq.com
 [pull]
 	rebase = true
+[include]
+	path = ~/.gitconfig.local
