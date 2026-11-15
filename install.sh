@@ -5,7 +5,7 @@ usage() {
     cat <<'EOF'
 Usage: ./install.sh [--dry-run] [--target DIRECTORY] [PACKAGE ...]
 
-Packages: bash git npm tmux vscode jupyter
+Packages: bash git npm tmux vim vscode jupyter
 Default: install all packages into HOME using GNU Stow.
 
   --dry-run           Preview links without changing files.
@@ -40,7 +40,7 @@ while [ "$#" -gt 0 ]; do
             usage
             exit 0
             ;;
-        bash|git|npm|tmux|vscode|jupyter)
+        bash|git|npm|tmux|vim|vscode|jupyter)
             packages+=("$1")
             shift
             ;;
@@ -61,7 +61,7 @@ if [ ! -d "$target" ]; then
     exit 1
 fi
 if [ "${#packages[@]}" -eq 0 ]; then
-    packages=(bash git npm tmux vscode jupyter)
+    packages=(bash git npm tmux vim vscode jupyter)
 fi
 target="$(cd -- "$target" && pwd -P)"
 

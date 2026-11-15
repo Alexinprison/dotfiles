@@ -19,9 +19,11 @@
 | `git/.config/git/ignore` | `~/.config/git/ignore`, global Git ignore rules |
 | `npm/.npmrc` | `~/.npmrc` |
 | `tmux/.tmux.conf` | `~/.tmux.conf` |
+| `vim/.vimrc` | `~/.vimrc`, plugin-free Vim configuration |
+| `windows/capslock.ahk`, `windows/install.ps1` | Windows CapsLock mapping and its separate installer; not Stow packages |
 | `vscode/.vscode-server/data/Machine/settings.json` | VS Code Remote / WSL Machine settings, at the same relative path |
 | `jupyter/.jupyter/lab/user-settings/@jupyterlab/apputils-extension/notification.jupyterlab-settings` | JupyterLab user settings, at the same relative path |
-| `bash/.stow-local-ignore`, `git/.stow-local-ignore` | Per-package Stow filters; not linked into HOME |
+| `bash/.stow-local-ignore`, `git/.stow-local-ignore`, `vim/.stow-local-ignore` | Per-package Stow filters; not linked into HOME |
 | `.gitignore`, `install.sh`, `README.md` | Repository management files; not linked into HOME |
 
 ## Complete differences from the defaults
@@ -86,6 +88,29 @@ The following Ubuntu defaults remain **unchanged**: returning early in nonintera
 | `include.path` | No such include | Adds `~/.gitconfig.local`, loaded after the settings above; a missing file is ignored, allowing optional local identity and other overrides |
 | Global ignore rules | The user ignore file does not contain this pattern by default | Includes the existing `**/.claude/settings.local.json` rule from `~/.config/git/ignore`, applying it to all repositories; ignore rules do not affect already tracked files |
 
+### Vim: `.vimrc`
+
+The Vim configuration uses built-in features and has no plugin downloads.
+
+| Setting | Vim default without a user vimrc on this machine | Current configuration |
+| --- | --- | --- |
+| Line numbers and cursor line | Off | Absolute current line, relative surrounding lines, highlighted cursor line |
+| Filetype detection, indentation, syntax | Enabled by the distribution/runtime defaults | Explicitly enabled |
+| Indentation | 8-column tabs, no space expansion | 4 spaces by default; filetype rules still take precedence, including Makefile tabs |
+| Search | Incremental, case-sensitive, no persistent highlight | Incremental and highlighted; case-insensitive unless the pattern contains uppercase |
+| Hidden modified buffers | Off | On; switching buffers retains unsaved edits |
+| Splits | Open above / left | Open below / right |
+| Mouse | Enabled by runtime defaults | Enabled in all modes |
+| Command completion | No `wildmenu` | Menu with longest-match completion followed by cycling |
+| Key-code timeout | 100 ms in runtime defaults | 100 ms; user mappings have a separate 500 ms timeout |
+| Persistent undo | Off | On, under `$XDG_STATE_HOME/vim/undo` or `~/.local/state/vim/undo` |
+| Swap and temporary write backups | Usually beside the edited file | Separate `swap` and `backup` directories under the same state directory; recovery remains enabled |
+| Cursor position | Restored by runtime defaults | Restored, with Git commit/rebase and diff buffers excluded |
+
+The state directories are created with mode `0700`, outside the repository. The leader key is **Space**: `Space w` saves, `Space q` quits (refusing unsaved changes), and `Space h` clears search highlighting. `Ctrl+h/j/k/l` moves between splits; visual-mode `<` and `>` keep the selection after indenting. The system clipboard is not forced because this Vim build has no native clipboard support.
+
+Run `./install.sh vim` to link the configuration. New Vim processes load it automatically; use `:source ~/.vimrc` to reload it. Optional `~/.vimrc.local` is loaded last and is excluded from Git and Stow.
+
 ### tmux: `.tmux.conf`
 
 | Setting / key | Default | Current configuration |
@@ -119,10 +144,10 @@ The defaults `doNotDisturbMode=false` and `checkForUpdates=true` are unchanged. 
 
 ### Repository and installation support files
 
-- `.gitignore`: retains the existing exclusions for credentials, environment files, private SSH/cloud/GPG data, the Wget HSTS cache, and history files, along with the exceptions for `.env.example` and public SSH configuration. Adds exclusions for `.claude-env`, `.bashrc.local`, `.gitconfig.local`, Python bytecode, and editor backup/swap files, while allowing only `/npm/.npmrc` through the npm configuration exclusion. These rules affect this repository only; global Git ignore rules are described above.
+- `.gitignore`: retains the existing exclusions for credentials, environment files, private SSH/cloud/GPG data, the Wget HSTS cache, and history files, along with the exceptions for `.env.example` and public SSH configuration. Adds exclusions for `.claude-env`, `.bashrc.local`, `.gitconfig.local`, `.vimrc.local`, Python bytecode, and editor backup/swap files, while allowing only `/npm/.npmrc` through the npm configuration exclusion. These rules affect this repository only; global Git ignore rules are described above.
 - `bash/.stow-local-ignore`: prevents linking `matrix_printer.py` into the root of HOME, and excludes Python caches, local Bash overrides, and editor backups from installation.
 - `git/.stow-local-ignore`: excludes the existing `.git-credentials`, local Git overrides, and editor backups from installation. Stow filters are independent of `.gitignore`, so both need configuration.
-- `install.sh`: adds an installation entry point limited to the six listed packages, with preview and target-directory options. Uses `--no-folding` to create individual file links so applications do not write new state into repository directories linked as a whole. Stow stops before making changes if conflicts are found; the script does not use `--adopt`.
+- `install.sh`: adds an installation entry point limited to the seven listed packages, with preview and target-directory options. Uses `--no-folding` to create individual file links so applications do not write new state into repository directories linked as a whole. Stow stops before making changes if conflicts are found; the script does not use `--adopt`.
 - `README.md`: documents differences from defaults, installation instructions, and verification results.
 
 ## Installation and activation
@@ -135,7 +160,7 @@ cd ~/dotfiles
 ./install.sh
 ```
 
-By default, all six packages are installed: `bash git npm tmux vscode jupyter`. You can also select a subset or preview installation into an existing empty directory:
+By default, all seven packages are installed: `bash git npm tmux vim vscode jupyter`. You can also select a subset or preview installation into an existing empty directory:
 
 ```bash
 ./install.sh --dry-run bash git npm tmux
@@ -168,10 +193,36 @@ The last command applies only when a tmux server is already running. GDB loads i
 To remove the configuration links, run this from the repository directory:
 
 ```bash
-stow --target="$HOME" --no-folding --delete bash git npm tmux vscode jupyter
+stow --target="$HOME" --no-folding --delete bash git npm tmux vim vscode jupyter
 ```
 
 This removes only the links managed by Stow; it does not automatically restore previous files or system defaults. If needed, restore the three original configuration files from the backup above, or copy the distribution's Bash templates from `/etc/skel`.
+
+## CapsLock: Escape on tap, Control on hold (Windows / WSL)
+
+This machine runs Ubuntu inside WSL2. Its terminal receives input from Windows, so the mapping is installed on the Windows host. `windows/capslock.ahk` uses [AutoHotkey v2](https://github.com/AutoHotkey/AutoHotkey) and applies to ordinary Windows applications, including terminals running WSL Vim.
+
+- A standalone CapsLock press released in **less than 200 ms** sends Escape.
+- Holding CapsLock sends left Control immediately, so combinations such as `CapsLock+c`, `CapsLock+a`, and `CapsLock+Shift+v` work without waiting for the timeout.
+- Releasing CapsLock after a combination or a long hold does not send Escape. Keyboard auto-repeat is suppressed; mouse input is included when deciding whether the press was standalone.
+- CapsLock no longer toggles capitalization. The physical Escape and Control keys keep their normal behavior.
+
+Install from WSL (separately from the Stow installer):
+
+```bash
+cd ~/dotfiles
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "$(wslpath -w "$PWD/windows/install.ps1")"
+```
+
+Or run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1` from a Windows checkout. `-ExecutionPolicy Bypass` applies to that process only; the installer does not change the saved execution policy.
+
+The installer downloads the official **AutoHotkey 2.0.31 portable ZIP**, verifies its pinned SHA-256, validates the script, and installs it under `%LOCALAPPDATA%\dotfiles\keyboard`. It creates **Dotfiles CapsLock.lnk** in the current user's Startup folder and starts the script immediately. The shortcut and runtime use Windows-local paths, so login startup does not depend on WSL. Administrator privileges and registry key remapping are not required. Mapping into administrator windows is outside this ordinary-user installation's scope.
+
+Re-run the installer after editing the repository script. It backs up a changed deployed script with a timestamp and replaces the running instance. `-ArchivePath PATH` accepts an already-downloaded ZIP (with the same checksum verification), and `-NoStart` installs the files and login shortcut without starting the remapper in the current session. Change `TapTimeout` in `windows/capslock.ahk` to adjust the tap threshold.
+
+To disable it, exit **capslock.ahk** from its AutoHotkey system-tray menu and remove **Dotfiles CapsLock.lnk** from `shell:startup`. This restores the physical CapsLock behavior for the session and future logins. The portable runtime can then be removed from `%LOCALAPPDATA%\dotfiles\keyboard` if no longer needed.
+
+Verify manually in Vim: enter Insert mode and tap CapsLock to return to Normal mode. In a disposable text field, hold CapsLock and press `a` to select all; a long hold followed by release should not send Escape. Also check your usual Ctrl+Shift combinations. The installer checks syntax and process startup; physical keyboard behavior requires this interactive check.
 
 ## Local overrides
 

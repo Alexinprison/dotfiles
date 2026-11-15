@@ -10,6 +10,7 @@
 !.env.example
 .bashrc.local
 .gitconfig.local
+.vimrc.local
 
 # Track only the reviewed npm settings file; never add tokens to it.
 .npmrc
