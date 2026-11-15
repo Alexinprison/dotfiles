@@ -5,7 +5,7 @@ filetype plugin indent on
 syntax enable
 
 " Editing and display.
-set number relativenumber
+set number norelativenumber
 set cursorline
 set showcmd ruler laststatus=2
 set hidden

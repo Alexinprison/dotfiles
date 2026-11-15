@@ -94,7 +94,7 @@ The Vim configuration uses built-in features and has no plugin downloads.
 
 | Setting | Vim default without a user vimrc on this machine | Current configuration |
 | --- | --- | --- |
-| Line numbers and cursor line | Off | Absolute current line, relative surrounding lines, highlighted cursor line |
+| Line numbers and cursor line | Off | Absolute line numbers on every line, highlighted cursor line |
 | Filetype detection, indentation, syntax | Enabled by the distribution/runtime defaults | Explicitly enabled |
 | Indentation | 8-column tabs, no space expansion | 4 spaces by default; filetype rules still take precedence, including Makefile tabs |
 | Search | Incremental, case-sensitive, no persistent highlight | Incremental and highlighted; case-insensitive unless the pattern contains uppercase |
